@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Embedded Video Gallery</title>
     <style>
-        /* General Styles */
         body {
             font-family: sans-serif;
             margin: 0;
@@ -17,163 +16,128 @@
             padding: 20px;
             box-sizing: border-box;
         }
-
-        /* Gallery Grid Styles */
         .gallery-container {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* 3 columns */
-            grid-template-rows: repeat(3, auto); /* 3 rows */
-            gap: 10px; /* Space between grid items */
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, auto);
+            gap: 10px;
             max-width: 900px;
             width: 100%;
         }
-
         .gallery-item {
             position: relative;
             width: 100%;
-            padding-bottom: 56.25%; /* 16:9 Aspect Ratio (56.25% = 9 / 16) */
+            padding-bottom: 56.25%;
             height: 0;
-            cursor: pointer;
             overflow: hidden;
             border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background: #fff;
         }
-        
-        .gallery-item iframe {
+        .gallery-item iframe, .gallery-item > div {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            border: none; /* Removed border attribute */
-            transition: transform 0.3s ease;
+            border: none;
         }
-
-        .gallery-item:hover iframe {
-            transform: scale(1.05);
-        }
-
-        /* Modal Pop-up Styles */
-        .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 100; /* Sit on top */
-            left: 0;
-            top: 0;
+        .gallery-link {
+            display: block;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.85); /* Black background with transparency */
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            position: relative;
-            width: 90%;
-            max-width: 960px; /* Adjust max width for 16:9 aspect ratio */
-            max-height: 90%;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-            border-radius: 10px;
-            overflow: hidden; /* To apply the border-radius to the iframe */
-        }
-        
-        .modal-content iframe {
-            width: 100%;
-            height: 540px; /* A fixed height for the player inside the modal */
-        }
-
-        .close {
             position: absolute;
-            top: 15px;
-            right: 25px;
-            color: #fff;
-            font-size: 40px;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 200;
+            top: 0; left: 0;
+            z-index: 2;
+            text-indent: -9999px;
         }
-
-        .close:hover,
-        .close:focus {
-            color: #bbb;
-            text-decoration: none;
+        .gallery-item:hover {
+            filter: brightness(0.92);
         }
     </style>
 </head>
 <body>
-
-    <div class="gallery-container">
-        </div>
-
-    <div id="video-modal" class="modal">
-        <span class="close">&times;</span>
-        <div class="modal-content">
-            <iframe id="modal-iframe" src="" frameborder="0" allowfullscreen allow="autoplay"></iframe>
-        </div>
-    </div>
-
+    <div class="gallery-container" id="gallery"></div>
     <script>
-        // JavaScript for dynamically creating the video gallery and handling the modal
-        document.addEventListener('DOMContentLoaded', () => {
-            const galleryContainer = document.querySelector('.gallery-container');
-            const videoModal = document.getElementById('video-modal');
-            const modalIframe = document.getElementById('modal-iframe');
-            const closeModal = document.querySelector('.close');
-            
-            // The embed URL for the Streamable player
-            const embedUrl = "https://streamable.com/e/nmzo1h?";
-            const totalVideos = 9; // 3 columns * 3 rows
-
-            // Loop to create 9 iframe elements in the grid
-            for (let i = 0; i < totalVideos; i++) {
-                const galleryItem = document.createElement('div');
-                galleryItem.classList.add('gallery-item');
-
-                const iframe = document.createElement('iframe');
-                iframe.src = embedUrl;
-                iframe.setAttribute('frameborder', '0');
-                iframe.setAttribute('allowfullscreen', 'true');
-                iframe.setAttribute('loading', 'lazy'); // Improves performance by lazy-loading the iframes
-                iframe.setAttribute('allow', 'autoplay'); // Allows autoplay (subject to browser rules)
-
-                galleryItem.appendChild(iframe);
-                galleryContainer.appendChild(galleryItem);
-
-                // Add a click event listener to each gallery item
-                galleryItem.addEventListener('click', () => {
-                    // Set the modal iframe source to the embed URL
-                    modalIframe.src = embedUrl;
-                    // Display the modal
-                    videoModal.style.display = 'flex';
-                });
+        // Unique Streamable video IDs for each cell
+        const videoIDs = [
+            "nmzo1h", // 1st cell
+            "uc8o29", // 2nd cell (custom embed)
+            "wt67qt", // 3rd cell (custom embed)
+            "uc8o29", // 4th cell
+            "uc8o29", // 5th cell
+            "uc8o29", // 6th cell
+            "uc8o29", // 7th cell
+            "uc8o29", // 8th cell
+            "uc8o29"  // 9th cell
+        ];
+        const gallery = document.getElementById('gallery');
+        videoIDs.forEach((id, idx) => {
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            if(idx === 1) {
+                // Second grid: custom embed for uc8o29
+                item.innerHTML = `
+                    <a class="gallery-link" href="gallery.html?video=${id}" title="Open in gallery">Video ${idx+1}</a>
+                    <iframe src="https://streamable.com/e/${id}" allow="fullscreen" allowfullscreen loading="lazy"></iframe>
+                `;
+            } else if(idx === 2) {
+                // Third grid: custom embed for wt67qt
+                item.innerHTML = `
+                    <a class="gallery-link" href="gallery.html?video=${id}" title="Open in gallery">Video ${idx+1}</a>
+                    <iframe src="https://streamable.com/e/${id}" allow="fullscreen" allowfullscreen loading="lazy"></iframe>
+                `;
+            } else if(idx === 3) {
+                // Third grid: custom embed for uc8o29
+                item.innerHTML = `
+                    <a class="gallery-link" href="gallery.html?video=${id}" title="Open in gallery">Video ${idx+1}</a>
+                    <iframe src="https://streamable.com/e/${id}" allow="fullscreen" allowfullscreen loading="lazy"></iframe>
+                `;
+            } else if(idx === 4) {
+                // Third grid: custom embed for uc8o29
+                item.innerHTML = `
+                    <a class="gallery-link" href="gallery.html?video=${id}" title="Open in gallery">Video ${idx+1}</a>
+                    <iframe src="https://streamable.com/e/${id}" allow="fullscreen" allowfullscreen loading="lazy"></iframe>
+                `;
+            } else if(idx === 5) {
+                // Third grid: custom embed for uc8o29
+                item.innerHTML = `
+                    <a class="gallery-link" href="gallery.html?video=${id}" title="Open in gallery">Video ${idx+1}</a>
+                    <iframe src="https://streamable.com/e/${id}" allow="fullscreen" allowfullscreen loading="lazy"></iframe>
+                `;
+            } else if(idx === 6) {
+                // Third grid: custom embed for uc8o29
+                item.innerHTML = `
+                    <a class="gallery-link" href="gallery.html?video=${id}" title="Open in gallery">Video ${idx+1}</a>
+                    <iframe src="https://streamable.com/e/${id}" allow="fullscreen" allowfullscreen loading="lazy"></iframe>
+                `;
+            } else if(idx === 7) {
+                // Third grid: custom embed for uc8o29
+                item.innerHTML = `
+                    <a class="gallery-link" href="gallery.html?video=${id}" title="Open in gallery">Video ${idx+1}</a>
+                    <iframe src="https://streamable.com/e/${id}" allow="fullscreen" allowfullscreen loading="lazy"></iframe>
+                `;
+            } else if(idx === 8) {
+                // Third grid: custom embed for uc8o29
+                item.innerHTML = `
+                    <a class="gallery-link" href="gallery.html?video=${id}" title="Open in gallery">Video ${idx+1}</a>
+                    <iframe src="https://streamable.com/e/${id}" allow="fullscreen" allowfullscreen loading="lazy"></iframe>
+                `;
+            } else if(idx === 9) {
+                // Third grid: custom embed for uc8o29
+                item.innerHTML = `
+                    <a class="gallery-link" href="gallery.html?video=${id}" title="Open in gallery">Video ${idx+1}</a>
+                    <iframe src="https://streamable.com/e/${id}" allow="fullscreen" allowfullscreen loading="lazy"></iframe>
+                `;
+            } else {
+                // Standard embed for other grid cells
+                item.innerHTML = `
+                    <a class="gallery-link" href="gallery.html?video=${id}" title="Open in gallery">Video ${idx+1}</a>
+                    <iframe src="https://streamable.com/e/${id}" allow="fullscreen" allowfullscreen loading="lazy"></iframe>
+                `;
             }
-
-            // Function to close the modal
-            const hideModal = () => {
-                // Hide the modal
-                videoModal.style.display = 'none';
-                // Reset the iframe source to stop playback
-                modalIframe.src = "";
-            };
-
-            // Close the modal when the close button is clicked
-            closeModal.addEventListener('click', hideModal);
-
-            // Close the modal when clicking on the dark background
-            videoModal.addEventListener('click', (event) => {
-                if (event.target === videoModal) {
-                    hideModal();
-                }
-            });
-
-            // Optional: Close the modal with the 'Escape' key
-            document.addEventListener('keydown', (event) => {
-                if (event.key === 'Escape' && videoModal.style.display === 'flex') {
-                    hideModal();
-                }
-            });
+            gallery.appendChild(item);
         });
     </script>
-
 </body>
 </html>
