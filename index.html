@@ -241,8 +241,7 @@
             flex-grow: 1;
             padding: 20px;
             overflow-y: auto;
-            display: flex; /* For inverted order */
-            flex-direction: column-reverse; /* New messages at bottom */
+            /* No flex-direction: column-reverse here anymore */
             scrollbar-width: thin;
             scrollbar-color: var(--bg-primary) transparent;
         }
@@ -325,6 +324,17 @@
             color: var(--text-primary);
         }
 
+        /* Style for the send button (now an icon) */
+        #sendButton {
+            color: var(--brand-purple); /* Make it stand out */
+            font-size: 1.5em; /* Larger for better tap target */
+            margin-left: 12px; /* More spacing */
+            cursor: pointer;
+        }
+        #sendButton:hover {
+            color: #4752c4; /* Darker purple on hover */
+        }
+
         /* Username Modal/Input (initial state) */
         .username-overlay {
             position: fixed;
@@ -399,28 +409,26 @@
             <div class="server-icon home" title="Home">D</div>
             <div class="server-icon" title="My Server">MS</div>
             <div class="server-icon add-server" title="Add a Server">+</div>
-            </div>
+        </div>
 
         <div class="channel-sidebar">
             <div class="channel-sidebar-header">
-                My Awesome Server
+                HBMaxx Room
                 <span>⚙️</span>
             </div>
             <div class="channel-list">
-                <div class="channel-category">TEXT CHANNELS</div>
+                <div class="channel-category">Global Chat</div>
                 <div class="channel-item active"><span>#</span>general</div>
-                <div class="channel-item"><span>#</span>random</div>
-                <div class="channel-item"><span>#</span>memes</div>
-                <div class="channel-category">VOICE CHANNELS</div>
-                <div class="channel-item"><span>🔊</span>General Voice</div>
-                </div>
+            </div>
             <div class="user-profile-bar">
                 <div class="avatar" id="profileAvatar"></div>
                 <div class="user-info">
                     <div class="username" id="profileUsername"></div>
-                    <div class="user-id">#1234</div> </div>
+                    <div class="user-id">#1234</div>
+                </div>
                 <div class="settings-icons">
-                    <span>🔇</span> <span>⚙️</span> </div>
+                    <span>🔇</span> <span>⚙️</span>
+                </div>
             </div>
         </div>
 
@@ -434,11 +442,12 @@
             <div class="chat-input-area">
                 <div class="chat-input-wrapper">
                     <input type="text" id="messageInput" placeholder="Message #general" disabled>
-                    <span class="input-icon">😀</span> <span class="input-icon">➕</span> <button id="sendButton" style="display: none;"></button> </div>
+                    <span class="input-icon">😀</span>
+                    <span class="input-icon">➕</span>
+                    <span class="input-icon" id="sendButton">➤</span> </div>
             </div>
         </div>
-
-        </div>
+    </div>
 
     <script>
         // Frontend Connection URL - IMPORTANT: Replace with your actual backend URL
@@ -452,7 +461,7 @@
 
         const messagesDiv = document.getElementById('messages');
         const messageInput = document.getElementById('messageInput');
-        const sendButton = document.getElementById('sendButton'); // Still useful for click simulation
+        const sendButton = document.getElementById('sendButton'); // Now a visible icon
 
         const profileAvatar = document.getElementById('profileAvatar');
         const profileUsername = document.getElementById('profileUsername');
@@ -473,24 +482,39 @@
 
         // Function to append messages to the chatbox
         function appendMessage(msg) {
-            const lastMessageGroup = messagesDiv.querySelector('.message-group:first-child');
-            const lastMessageAuthor = lastMessageGroup ? lastMessageGroup.dataset.author : null;
             const messageTimestamp = new Date(msg.timestamp);
+
+            // Create the message content element first
+            const messageContent = document.createElement('div');
+            messageContent.classList.add('message-content');
+            messageContent.textContent = msg.text;
+
+            // Get the very last message group in the chat
+            const lastMessageGroup = messagesDiv.querySelector('.message-group:last-child');
+            const lastMessageAuthor = lastMessageGroup ? lastMessageGroup.dataset.author : null;
+            const lastMessageGroupTimestamp = lastMessageGroup ? new Date(lastMessageGroup.dataset.timestamp) : null;
 
             let messageGroup;
 
-            // Group messages from the same user if sent within a short time frame
-            if (lastMessageAuthor === msg.user) { // Check if the last message was from the same user
+            // Check if the new message should be grouped with the last one
+            // (Same user AND within a short time frame, e.g., 5 minutes)
+            const FIVE_MINUTES_MS = 5 * 60 * 1000;
+            const isSameUserAndRecent = lastMessageAuthor === msg.user &&
+                                        (messageTimestamp.getTime() - lastMessageGroupTimestamp.getTime() < FIVE_MINUTES_MS);
+
+            if (isSameUserAndRecent) {
+                // Append message content to the existing group
                 messageGroup = lastMessageGroup;
-                const messageContent = document.createElement('div');
-                messageContent.classList.add('message-content');
-                messageContent.textContent = msg.text;
-                messageGroup.prepend(messageContent); // Prepend to maintain reverse order
+                messageGroup.appendChild(messageContent);
+                // Update the timestamp of the group to the latest message's timestamp
+                // This ensures subsequent messages continue grouping correctly
+                messageGroup.dataset.timestamp = messageTimestamp.toISOString();
             } else {
-                // New message group
+                // Create a new message group
                 messageGroup = document.createElement('div');
                 messageGroup.classList.add('message-group');
                 messageGroup.dataset.author = msg.user; // Store author for grouping
+                messageGroup.dataset.timestamp = messageTimestamp.toISOString(); // Store timestamp for grouping
 
                 const messageHeader = document.createElement('div');
                 messageHeader.classList.add('message-header');
@@ -498,7 +522,7 @@
                 const authorSpan = document.createElement('span');
                 authorSpan.classList.add('author');
                 authorSpan.textContent = msg.user;
-                authorSpan.style.color = getUserColor(msg.user); // Apply user-specific color
+                authorSpan.style.color = getUserColor(msg.user);
                 messageHeader.appendChild(authorSpan);
 
                 const timestampSpan = document.createElement('span');
@@ -506,16 +530,13 @@
                 timestampSpan.textContent = messageTimestamp.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
                 messageHeader.appendChild(timestampSpan);
 
-                const messageContent = document.createElement('div');
-                messageContent.classList.add('message-content');
-                messageContent.textContent = msg.text;
-
                 messageGroup.appendChild(messageHeader);
                 messageGroup.appendChild(messageContent);
-                messagesDiv.prepend(messageGroup); // Prepend for reversed display
+                messagesDiv.appendChild(messageGroup); // Append to the messages container
             }
 
-            messagesDiv.scrollTop = 0; // Keep at the bottom (or top of reversed content)
+            // Always scroll to the bottom to see the newest message
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
 
@@ -531,6 +552,9 @@
                 // Update profile bar
                 profileUsername.textContent = currentUser;
                 profileAvatar.textContent = currentUser.charAt(0).toUpperCase(); // First letter of username
+
+                // Fetch old messages immediately after username is set
+                fetchOldMessages();
             } else {
                 alert('Please enter a username!');
             }
@@ -567,10 +591,7 @@
         // Handle connection events (for debugging)
         socket.on('connect', () => {
             console.log('Connected to Socket.io server!');
-            // After connecting, if already a user, fetch old messages
-            if (currentUser) {
-                fetchOldMessages();
-            }
+            // Removed redundant fetchOldMessages call here, now called after username input
         });
 
         socket.on('disconnect', () => {
@@ -591,11 +612,11 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const messages = await response.json();
-                // Process messages in chronological order, then reverse for display
+                // Process messages in chronological order, then append for display
                 messages.forEach(msg => {
                     const messageTimestamp = new Date(msg.timestamp);
                     msg.timestamp = messageTimestamp.toISOString(); // Ensure consistent format
-                    appendMessage(msg); // Append in reverse order due to flex-direction: column-reverse
+                    appendMessage(msg);
                 });
             } catch (error) {
                 console.error('Error fetching old messages:', error);
@@ -606,7 +627,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             usernameOverlay.style.display = 'flex';
             initialUsernameInput.focus();
-            // Old messages will be fetched *after* username is set and socket connects
         });
     </script>
 </body>
