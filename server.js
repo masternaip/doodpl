@@ -1,61 +1,89 @@
+// server.js
 const express = require('express');
 const http = require('http');
-const { Server } = require('socket.io');
-const { MongoClient } = require('mongodb');
 const cors = require('cors');
+const mongoose = require('mongoose');
+const { Server } = require('socket.io');
+
+// Load environment variables (for local dev, use a .env file)
+require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
+
 const io = new Server(server, {
-  cors: { origin: '*' }
+  cors: {
+    origin: "*", // For production, restrict this to your Netlify frontend URL!
+    methods: ["GET", "POST"]
+  }
 });
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Your MongoDB URI
-const MONGO_URI = process.env.MONGO_URI;
-const DB_NAME = "chatroom";
-const COLLECTION_NAME = "messages";
-
-let messagesCollection;
-
 // Connect to MongoDB
-MongoClient.connect(MONGO_URI, { useUnifiedTopology: true })
-  .then(client => {
-    const db = client.db(DB_NAME);
-    messagesCollection = db.collection(COLLECTION_NAME);
-    server.listen(3000, () => console.log('Server running on http://localhost:3000'));
-  })
+const mongoUri = process.env.MONGO_URI;
+if (!mongoUri) {
+  throw new Error("MONGO_URI environment variable not set!");
+}
+mongoose.connect(mongoUri, { useNewUrlParser: true })
+  .then(() => console.log('MongoDB connected'))
   .catch(err => {
     console.error('MongoDB connection error:', err);
     process.exit(1);
   });
 
-// Socket.io logic
-io.on('connection', (socket) => {
-  // Send previous messages to the newly connected client
-  messagesCollection.find().sort({ timestamp: 1 }).toArray()
-    .then(messages => {
-      socket.emit('messages', messages);
-    })
-    .catch(err => console.error('Error fetching messages:', err));
+// Example Mongoose schema/model for messages
+const messageSchema = new mongoose.Schema({
+  user: String,
+  text: String,
+  timestamp: { type: Date, default: Date.now }
+});
+const Message = mongoose.model('Message', messageSchema);
 
-  // Listen for new chat messages
-  socket.on('chat message', (msg) => {
-    const message = {
-      text: msg,
-      timestamp: new Date()
-    };
-    messagesCollection.insertOne(message)
-      .then(() => {
-        io.emit('chat message', message);
-      })
-      .catch(err => console.error('Error saving message:', err));
+// API endpoint to fetch all messages
+app.get('/messages', async (req, res) => {
+  try {
+    const messages = await Message.find().sort({ timestamp: 1 });
+    res.json(messages);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch messages" });
+  }
+});
+
+// Socket.io for real-time chat
+io.on('connection', (socket) => {
+  console.log('A user connected:', socket.id);
+
+  // Receive new messages from clients
+  socket.on('chat message', async (msg) => {
+    try {
+      const message = new Message({
+        user: msg.user,
+        text: msg.text
+      });
+      await message.save();
+
+      // Broadcast message to all connected clients
+      io.emit('chat message', message);
+    } catch (err) {
+      console.error('Error saving message:', err);
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
   });
 });
 
-// (Optional) health check endpoint
+// Health check endpoint
 app.get('/', (req, res) => {
   res.send('Chat server is running!');
+});
+
+// Start server
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
