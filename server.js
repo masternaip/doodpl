@@ -1,39 +1,36 @@
+// server.js
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const { Server } = require('socket.io');
 
-// Load environment variables (for local dev, use a .env file)
-require('dotenv').config();
-
 const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "*", // For production, restrict this to your Netlify frontend URL!
+    origin: "*", // For production, set this to your frontend URL
     methods: ["GET", "POST"]
   }
 });
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB
+// MongoDB Connection
 const mongoUri = process.env.MONGO_URI;
 if (!mongoUri) {
-  throw new Error("MONGO_URI environment variable not set!");
+  throw new Error("MONGO_URI environment variable not set");
 }
-mongoose.connect(mongoUri, { useNewUrlParser: true })
+mongoose.connect(mongoUri)
   .then(() => console.log('MongoDB connected'))
   .catch(err => {
     console.error('MongoDB connection error:', err);
     process.exit(1);
   });
 
-// Example Mongoose schema/model for messages
+// Message schema/model
 const messageSchema = new mongoose.Schema({
   user: String,
   text: String,
@@ -41,7 +38,7 @@ const messageSchema = new mongoose.Schema({
 });
 const Message = mongoose.model('Message', messageSchema);
 
-// API endpoint to fetch all messages
+// API endpoint to get all messages
 app.get('/messages', async (req, res) => {
   try {
     const messages = await Message.find().sort({ timestamp: 1 });
@@ -51,11 +48,10 @@ app.get('/messages', async (req, res) => {
   }
 });
 
-// Socket.io for real-time chat
+// Socket.io event handling
 io.on('connection', (socket) => {
-  console.log('A user connected:', socket.id);
+  console.log('User connected:', socket.id);
 
-  // Receive new messages from clients
   socket.on('chat message', async (msg) => {
     try {
       const message = new Message({
@@ -63,8 +59,6 @@ io.on('connection', (socket) => {
         text: msg.text
       });
       await message.save();
-
-      // Broadcast message to all connected clients
       io.emit('chat message', message);
     } catch (err) {
       console.error('Error saving message:', err);
@@ -76,12 +70,11 @@ io.on('connection', (socket) => {
   });
 });
 
-// Health check endpoint
+// Health check
 app.get('/', (req, res) => {
   res.send('Chat server is running!');
 });
 
-// Start server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
