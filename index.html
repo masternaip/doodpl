@@ -3,630 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Discord-like Chat App</title>
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Embedded Video Gallery</title>
     <style>
-        :root {
-            --bg-primary: #36393f; /* Dark grey for channel sidebar */
-            --bg-secondary: #2f3136; /* Darker grey for chat background */
-            --bg-tertiary: #202225; /* Even darker for server sidebar */
-            --text-primary: #dcddde;
-            --text-secondary: #8e9297;
-            --channel-hover: #34373c;
-            --brand-purple: #5865f2;
-            --header-text: #fff;
-            --border-color: #2b2d31;
-            --input-bg: #40444b;
-        }
-
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: sans-serif;
             margin: 0;
-            padding: 0;
-            display: flex;
-            height: 100vh;
-            overflow: hidden; /* Hide scrollbars on body */
-            background-color: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
-
-        .discord-container {
-            display: flex;
-            width: 100%;
-            height: 100%;
-        }
-
-        /* Server Sidebar */
-        .server-sidebar {
-            width: 72px; /* Standard Discord server sidebar width */
-            background-color: var(--bg-tertiary);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 10px 0;
-            gap: 8px;
-            overflow-y: auto;
-            scrollbar-width: thin; /* Firefox */
-            scrollbar-color: var(--bg-primary) transparent; /* Firefox */
-        }
-        .server-sidebar::-webkit-scrollbar {
-            width: 8px;
-        }
-        .server-sidebar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .server-sidebar::-webkit-scrollbar-thumb {
-            background-color: var(--bg-primary);
-            border-radius: 4px;
-        }
-
-        .server-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%; /* Circular */
-            background-color: var(--bg-primary);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-weight: 600;
-            cursor: pointer;
-            transition: border-radius 0.2s ease-in-out, background-color 0.2s ease-in-out;
-            color: var(--text-primary);
-            font-size: 1.2em;
-            text-transform: uppercase;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+            padding: 20px;
+            box-sizing: border-box;
         }
-
-        .server-icon:hover {
-            border-radius: 30%; /* Squircle effect */
-            background-color: var(--brand-purple);
-        }
-        .server-icon.home {
-            background-color: var(--brand-purple);
-            border-radius: 30%;
-        }
-        .server-icon.add-server {
-            background-color: var(--bg-primary);
-            color: #43b581; /* Discord green */
-        }
-        .server-icon.add-server:hover {
-            background-color: #43b581;
-            color: white;
-        }
-
-        /* Channel Sidebar */
-        .channel-sidebar {
-            width: 240px; /* Standard Discord channel sidebar width */
-            background-color: var(--bg-primary);
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid var(--border-color);
-            position: relative; /* For profile at bottom */
-        }
-
-        .channel-sidebar-header {
-            padding: 10px 15px;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--header-text);
-            font-weight: 600;
-            font-size: 1.1em;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .channel-list {
-            flex-grow: 1;
-            padding: 10px 10px;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: var(--bg-secondary) transparent;
-        }
-        .channel-list::-webkit-scrollbar {
-            width: 8px;
-        }
-        .channel-list::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .channel-list::-webkit-scrollbar-thumb {
-            background-color: var(--bg-secondary);
-            border-radius: 4px;
-        }
-
-        .channel-category {
-            color: var(--text-secondary);
-            font-size: 0.8em;
-            font-weight: 600;
-            margin-top: 15px;
-            margin-bottom: 5px;
-            padding: 0 5px;
-            text-transform: uppercase;
-        }
-
-        .channel-item {
-            display: flex;
-            align-items: center;
-            padding: 8px 10px;
-            border-radius: 4px;
-            margin-bottom: 2px;
-            cursor: pointer;
-            transition: background-color 0.1s ease;
-        }
-
-        .channel-item:hover {
-            background-color: var(--channel-hover);
-            color: var(--text-primary);
-        }
-
-        .channel-item.active {
-            background-color: var(--channel-hover);
-            color: var(--text-primary);
-            font-weight: 500;
-        }
-
-        .channel-item span {
-            margin-right: 8px;
-            color: var(--text-secondary);
-        }
-        .channel-item.active span {
-            color: var(--text-primary);
-        }
-
-        .user-profile-bar {
-            background-color: #292b2f; /* Discord user bar background */
-            padding: 10px 15px;
-            display: flex;
-            align-items: center;
+        .gallery-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-            border-top: 1px solid var(--border-color);
+            max-width: 900px;
+            width: 100%;
         }
-        .user-profile-bar .avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background-color: var(--brand-purple); /* Placeholder */
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 0.9em;
-            font-weight: 500;
-        }
-        .user-profile-bar .user-info {
-            flex-grow: 1;
-        }
-        .user-profile-bar .username {
-            font-weight: 600;
-            font-size: 0.9em;
-        }
-        .user-profile-bar .user-id {
-            font-size: 0.75em;
-            color: var(--text-secondary);
-        }
-        .user-profile-bar .settings-icons span {
-            cursor: pointer;
-            margin-left: 8px;
-            color: var(--text-secondary);
-            transition: color 0.1s ease;
-        }
-        .user-profile-bar .settings-icons span:hover {
-            color: var(--text-primary);
-        }
-
-
-        /* Chat Area */
-        .chat-area {
-            flex-grow: 1;
-            background-color: var(--bg-secondary);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chat-header {
-            padding: 10px 20px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--header-text);
-            font-weight: 600;
-            font-size: 1.1em;
-        }
-        .chat-header .hash-icon {
-            color: var(--text-secondary); /* or #72767d */
-            font-size: 1.5em;
-        }
-
-        .chat-messages {
-            flex-grow: 1;
-            padding: 20px;
-            overflow-y: auto;
-            /* No flex-direction: column-reverse here anymore */
-            scrollbar-width: thin;
-            scrollbar-color: var(--bg-primary) transparent;
-        }
-        .chat-messages::-webkit-scrollbar {
-            width: 8px;
-        }
-        .chat-messages::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .chat-messages::-webkit-scrollbar-thumb {
-            background-color: var(--bg-primary);
-            border-radius: 4px;
-        }
-
-        .message-group {
-            margin-bottom: 17px; /* Spacing between message groups by same user */
-        }
-        .message-group:last-child {
-            margin-bottom: 0; /* No bottom margin for the very last group */
-        }
-
-        .message-header {
-            display: flex;
-            align-items: baseline;
-            margin-bottom: 2px;
-        }
-        .message-header .author {
-            font-weight: 600;
-            color: white; /* Brighter for author */
-            margin-right: 8px;
-            font-size: 1em;
-        }
-        .message-header .timestamp {
-            font-size: 0.75em;
-            color: var(--text-secondary);
-        }
-
-        .message-content {
-            padding-left: 10px; /* Indent message text */
-            font-size: 0.95em;
-            line-height: 1.35;
-        }
-
-        /* Message input area */
-        .chat-input-area {
-            padding: 20px;
-            background-color: var(--bg-secondary); /* Same as chat area */
-            border-top: 1px solid var(--border-color); /* Not always present in Discord but good for separation */
-        }
-
-        .chat-input-wrapper {
-            background-color: var(--input-bg);
+        .gallery-item {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
             border-radius: 8px;
-            display: flex;
-            align-items: center;
-            padding: 8px 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background: #fff;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
-
-        .chat-input-wrapper input[type="text"] {
-            flex-grow: 1;
-            background: none;
-            border: none;
-            outline: none;
-            color: var(--text-primary);
-            font-size: 0.95em;
-            padding: 5px 0;
-        }
-        .chat-input-wrapper input[type="text"]::placeholder {
-            color: var(--text-secondary);
-        }
-
-        .chat-input-wrapper .input-icon {
-            color: var(--text-secondary);
-            font-size: 1.2em;
-            margin-left: 8px;
-            cursor: pointer;
-            transition: color 0.1s ease;
-        }
-        .chat-input-wrapper .input-icon:hover {
-            color: var(--text-primary);
-        }
-
-        /* Style for the send button (now an icon) */
-        #sendButton {
-            color: var(--brand-purple); /* Make it stand out */
-            font-size: 1.5em; /* Larger for better tap target */
-            margin-left: 12px; /* More spacing */
-            cursor: pointer;
-        }
-        #sendButton:hover {
-            color: #4752c4; /* Darker purple on hover */
-        }
-
-        /* Username Modal/Input (initial state) */
-        .username-overlay {
-            position: fixed;
+        .gallery-item iframe, .gallery-item > div {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .username-modal {
-            background-color: var(--bg-primary);
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            width: 300px;
-        }
-
-        .username-modal h2 {
-            color: var(--header-text);
-            margin-bottom: 20px;
-        }
-
-        .username-modal input {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            background-color: var(--input-bg);
-            color: var(--text-primary);
-            font-size: 1em;
-            outline: none;
-        }
-        .username-modal input::placeholder {
-            color: var(--text-secondary);
-        }
-
-        .username-modal button {
-            background-color: var(--brand-purple);
-            color: white;
             border: none;
-            padding: 12px 25px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 600;
-            transition: background-color 0.2s ease;
         }
-
-        .username-modal button:hover {
-            background-color: #4752c4; /* Darker purple */
+        .gallery-link {
+            display: block;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 2;
+            text-indent: -9999px;
+        }
+        .gallery-item:hover {
+            filter: brightness(0.92);
+        }
+        /* MOBILE RESPONSIVE ENHANCEMENTS */
+        @media (max-width: 900px) {
+            .gallery-container {
+                grid-template-columns: repeat(2, 1fr);
+                max-width: 600px;
+            }
+        }
+        @media (max-width: 700px) {
+            body {
+                padding: 0;
+            }
+            .gallery-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+                border-radius: 0;
+                box-shadow: none;
+                width: 100%;
+                max-width: none;
+                box-sizing: border-box;
+            }
+            .gallery-item {
+                border-radius: 0;
+                box-shadow: none;
+                width: 100%;
+                height: 100%;
+                max-width: none;
+                max-height: none;
+                box-sizing: border-box;
+                overflow-y: auto;
+                padding-bottom: 56.25%;
+                transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            }
         }
     </style>
+    <meta name="monetag" content="65f753ac16e980191df1c3d11eddd832">
+    <script src="https://fpyf8.com/88/tag.min.js" data-zone="154647" async data-cfasync="false"></script>
 </head>
 <body>
-    <div class="username-overlay" id="usernameOverlay">
-        <div class="username-modal">
-            <h2>Enter Your Username</h2>
-            <input type="text" id="initialUsernameInput" placeholder="e.g., CoolUser#1234">
-            <button id="joinChatButton">Join Chat</button>
-        </div>
-    </div>
-
-    <div class="discord-container">
-        <div class="server-sidebar">
-            <div class="server-icon home" title="Home">D</div>
-            <div class="server-icon" title="My Server">MS</div>
-            <div class="server-icon add-server" title="Add a Server">+</div>
-        </div>
-
-        <div class="channel-sidebar">
-            <div class="channel-sidebar-header">
-                HBMaxx Room
-                <span>⚙️</span>
-            </div>
-            <div class="channel-list">
-                <div class="channel-category">Global Chat</div>
-                <div class="channel-item active"><span>#</span>general</div>
-            </div>
-            <div class="user-profile-bar">
-                <div class="avatar" id="profileAvatar"></div>
-                <div class="user-info">
-                    <div class="username" id="profileUsername"></div>
-                    <div class="user-id">#1234</div>
-                </div>
-                <div class="settings-icons">
-                    <span>🔇</span> <span>⚙️</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="chat-area">
-            <div class="chat-header">
-                <span class="hash-icon">#</span>
-                general
-            </div>
-            <div class="chat-messages" id="messages">
-                </div>
-            <div class="chat-input-area">
-                <div class="chat-input-wrapper">
-                    <input type="text" id="messageInput" placeholder="Message #general" disabled>
-                    <span class="input-icon">😀</span>
-                    <span class="input-icon">➕</span>
-                    <span class="input-icon" id="sendButton">➤</span> </div>
-            </div>
-        </div>
-    </div>
-
+    <div class="gallery-container" id="gallery"></div>
     <script>
-        // Frontend Connection URL - IMPORTANT: Replace with your actual backend URL
-        const backendUrl = 'https://doodpl.onrender.com'; // Or 'http://localhost:3000' for local testing
-
-        const socket = io(backendUrl);
-
-        const usernameOverlay = document.getElementById('usernameOverlay');
-        const initialUsernameInput = document.getElementById('initialUsernameInput');
-        const joinChatButton = document.getElementById('joinChatButton');
-
-        const messagesDiv = document.getElementById('messages');
-        const messageInput = document.getElementById('messageInput');
-        const sendButton = document.getElementById('sendButton'); // Now a visible icon
-
-        const profileAvatar = document.getElementById('profileAvatar');
-        const profileUsername = document.getElementById('profileUsername');
-
-        let currentUser = '';
-        const userColors = {}; // To assign unique colors to users
-        const defaultColors = ['#1abc9c', '#2ecc71', '#3498db', '#9b59b6', '#e91e63', '#f1c40f', '#e67e22', '#e74c3c'];
-        let colorIndex = 0;
-
-        // Function to get a consistent color for a user
-        function getUserColor(username) {
-            if (!userColors[username]) {
-                userColors[username] = defaultColors[colorIndex % defaultColors.length];
-                colorIndex++;
-            }
-            return userColors[username];
-        }
-
-        // Function to append messages to the chatbox
-        function appendMessage(msg) {
-            const messageTimestamp = new Date(msg.timestamp);
-
-            // Create the message content element first
-            const messageContent = document.createElement('div');
-            messageContent.classList.add('message-content');
-            messageContent.textContent = msg.text;
-
-            // Get the very last message group in the chat
-            const lastMessageGroup = messagesDiv.querySelector('.message-group:last-child');
-            const lastMessageAuthor = lastMessageGroup ? lastMessageGroup.dataset.author : null;
-            const lastMessageGroupTimestamp = lastMessageGroup ? new Date(lastMessageGroup.dataset.timestamp) : null;
-
-            let messageGroup;
-
-            // Check if the new message should be grouped with the last one
-            // (Same user AND within a short time frame, e.g., 5 minutes)
-            const FIVE_MINUTES_MS = 5 * 60 * 1000;
-            const isSameUserAndRecent = lastMessageAuthor === msg.user &&
-                                        (messageTimestamp.getTime() - lastMessageGroupTimestamp.getTime() < FIVE_MINUTES_MS);
-
-            if (isSameUserAndRecent) {
-                // Append message content to the existing group
-                messageGroup = lastMessageGroup;
-                messageGroup.appendChild(messageContent);
-                // Update the timestamp of the group to the latest message's timestamp
-                // This ensures subsequent messages continue grouping correctly
-                messageGroup.dataset.timestamp = messageTimestamp.toISOString();
-            } else {
-                // Create a new message group
-                messageGroup = document.createElement('div');
-                messageGroup.classList.add('message-group');
-                messageGroup.dataset.author = msg.user; // Store author for grouping
-                messageGroup.dataset.timestamp = messageTimestamp.toISOString(); // Store timestamp for grouping
-
-                const messageHeader = document.createElement('div');
-                messageHeader.classList.add('message-header');
-
-                const authorSpan = document.createElement('span');
-                authorSpan.classList.add('author');
-                authorSpan.textContent = msg.user;
-                authorSpan.style.color = getUserColor(msg.user);
-                messageHeader.appendChild(authorSpan);
-
-                const timestampSpan = document.createElement('span');
-                timestampSpan.classList.add('timestamp');
-                timestampSpan.textContent = messageTimestamp.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-                messageHeader.appendChild(timestampSpan);
-
-                messageGroup.appendChild(messageHeader);
-                messageGroup.appendChild(messageContent);
-                messagesDiv.appendChild(messageGroup); // Append to the messages container
-            }
-
-            // Always scroll to the bottom to see the newest message
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-
-
-        // --- Event Listeners for Username Modal ---
-        joinChatButton.addEventListener('click', () => {
-            const enteredUsername = initialUsernameInput.value.trim();
-            if (enteredUsername) {
-                currentUser = enteredUsername;
-                usernameOverlay.style.display = 'none'; // Hide the modal
-                messageInput.disabled = false;
-                messageInput.focus(); // Focus on chat input
-
-                // Update profile bar
-                profileUsername.textContent = currentUser;
-                profileAvatar.textContent = currentUser.charAt(0).toUpperCase(); // First letter of username
-
-                // Fetch old messages immediately after username is set
-                fetchOldMessages();
-            } else {
-                alert('Please enter a username!');
-            }
-        });
-
-        initialUsernameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                joinChatButton.click();
-            }
-        });
-
-        // --- Chat Input and Send Logic ---
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) { // Prevent sending on Shift+Enter (for multiline)
-                e.preventDefault(); // Prevent default Enter behavior (new line)
-                sendButton.click();
-            }
-        });
-
-        sendButton.addEventListener('click', () => {
-            const messageText = messageInput.value.trim();
-            if (messageText && currentUser) {
-                socket.emit('chat message', { user: currentUser, text: messageText });
-                messageInput.value = ''; // Clear input
-            }
-        });
-
-
-        // --- Socket.io Event Handling ---
-        socket.on('chat message', (msg) => {
-            appendMessage(msg);
-        });
-
-        // Handle connection events (for debugging)
-        socket.on('connect', () => {
-            console.log('Connected to Socket.io server!');
-            // Removed redundant fetchOldMessages call here, now called after username input
-        });
-
-        socket.on('disconnect', () => {
-            console.log('Disconnected from Socket.io server.');
-        });
-
-        socket.on('connect_error', (err) => {
-            console.error('Socket.io connection error:', err);
-        });
-
-        // --- Fetching Old Messages ---
-        async function fetchOldMessages() {
-            try {
-                // Ensure the chat messages div is empty before adding old messages
-                messagesDiv.innerHTML = '';
-                const response = await fetch(`${backendUrl}/messages`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const messages = await response.json();
-                // Process messages in chronological order, then append for display
-                messages.forEach(msg => {
-                    const messageTimestamp = new Date(msg.timestamp);
-                    msg.timestamp = messageTimestamp.toISOString(); // Ensure consistent format
-                    appendMessage(msg);
-                });
-            } catch (error) {
-                console.error('Error fetching old messages:', error);
-            }
-        }
-
-        // Initial setup: Show username modal first
-        document.addEventListener('DOMContentLoaded', () => {
-            usernameOverlay.style.display = 'flex';
-            initialUsernameInput.focus();
+        // Unique Streamable video IDs for each cell
+        const videoIDs = [
+            "nmzo1h", // 1st cell
+            "uc8o29", // 2nd cell
+            "wt67qt", // 3rd cell
+            "uc8o29", // 4th cell
+            "uc8o29", // 5th cell
+            "uc8o29", // 6th cell
+            //"uc8o29", // 7th cell
+            //"uc8o29", // 8th cell
+            //"uc8o29"  // 9th cell
+        ];
+        const gallery = document.getElementById('gallery');
+        videoIDs.forEach((id, idx) => {
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            item.innerHTML = `
+                <a class="gallery-link" href="gallery.html?video=${id}" title="Open in gallery">Video ${idx+1}</a>
+                <iframe src="https://streamable.com/e/${id}" allow="fullscreen" allowfullscreen loading="lazy"></iframe>
+            `;
+            gallery.appendChild(item);
         });
     </script>
 </body>
