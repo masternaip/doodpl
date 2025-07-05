@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 
 // Your MongoDB URI
-const MONGO_URI = "mongodb+srv://makie006:vLMtDjOqeSaAm8Vt@hbmaxx.aw7rucy.mongodb.net/?retryWrites=true&w=majority&appName=hbmaxx";
+const MONGO_URI = process.env.MONGO_URI;
 const DB_NAME = "chatroom";
 const COLLECTION_NAME = "messages";
 
