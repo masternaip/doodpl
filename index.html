@@ -3,160 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doodstream Khalifa</title>
+    <title>Simple Chat App</title>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <style>
         body {
-            font-family: sans-serif;
+            font-family: Arial, sans-serif;
             margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: #f0f0f0;
-            padding: 20px;
-            box-sizing: border-box;
+            background-color: #f0f2f5;
         }
-        .gallery-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            max-width: 900px;
-            width: 100%;
-        }
-        .gallery-item {
-            position: relative;
-            width: 100%;
-            padding-bottom: 56.25%;
-            height: 0;
-            overflow: hidden;
+        .chat-container {
+            background-color: white;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            background: #fff;
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            width: 90%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
-        .gallery-item iframe, .gallery-item > div {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
+        .chat-header {
+            background-color: #007bff;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2em;
         }
-        .gallery-link {
+        .chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            border-bottom: 1px solid #eee;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 5px;
+            word-wrap: break-word;
+        }
+        .message.self {
+            background-color: #e0f7fa;
+            text-align: right;
+        }
+        .message.other {
+            background-color: #f1f0f0;
+            text-align: left;
+        }
+        .message strong {
             display: block;
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0; left: 0;
-            z-index: 2;
-            text-indent: -9999px;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            color: #555;
         }
-        .gallery-item:hover {
-            filter: brightness(0.92);
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #eee;
         }
-        /* MOBILE RESPONSIVE ENHANCEMENTS */
-        @media (max-width: 900px) {
-            .gallery-container {
-                grid-template-columns: repeat(2, 1fr);
-                max-width: 600px;
-            }
+        .chat-input input[type="text"] {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+            font-size: 1em;
         }
-        @media (max-width: 700px) {
-            body {
-                padding: 0;
-            }
-            .gallery-container {
-                grid-template-columns: 1fr;
-                gap: 20px;
-                padding: 20px;
-                border-radius: 0;
-                box-shadow: none;
-                width: 100%;
-                max-width: none;
-                box-sizing: border-box;
-            }
-            .gallery-item {
-                border-radius: 0;
-                box-shadow: none;
-                width: 100%;
-                height: 100%;
-                max-width: none;
-                max-height: none;
-                box-sizing: border-box;
-                overflow-y: auto;
-                padding-bottom: 56.25%;
-                transition: background-color 0.3s ease, box-shadow 0.3s ease;
-            }
+        .chat-input button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .chat-input button:hover {
+            background-color: #0056b3;
+        }
+        .username-input {
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: calc(100% - 20px);
+            box-sizing: border-box;
         }
     </style>
-    <meta name="monetag" content="65f753ac16e980191df1c3d11eddd832">
-    <script src="https://fpyf8.com/88/tag.min.js" data-zone="154647" async data-cfasync="false"></script>
 </head>
 <body>
-    <div class="gallery-container" id="gallery"></div>
+    <div class="chat-container">
+        <div class="chat-header">Simple Chat</div>
+        <div class="chat-messages" id="messages">
+            </div>
+        <div class="chat-input">
+            <input type="text" id="usernameInput" placeholder="Enter your username..." class="username-input">
+            <input type="text" id="messageInput" placeholder="Type a message..." disabled>
+            <button id="sendButton" disabled>Send</button>
+        </div>
+    </div>
+
     <script>
-        // Unique Streamable video IDs for each cell
-        const videoIDs = [
-            "nmzo1h", // 1st cell
-            "uc8o29", // 2nd cell
-            "wt67qt", // 3rd cell
-            "uc8o29", // 4th cell
-            "uc8o29", // 5th cell
-            "uc8o29", // 6th cell
-            //"uc8o29", // 7th cell
-            //"uc8o29", // 8th cell
-            //"uc8o29"  // 9th cell
-        ];
-        const gallery = document.getElementById('gallery');
-        videoIDs.forEach((id, idx) => {
-            const item = document.createElement('div');
-            item.className = 'gallery-item';
-            item.innerHTML = `
-                <a class="gallery-link" href="gallery.html?video=${id}" title="Open in gallery">Video ${idx+1}</a>
-                <iframe src="https://streamable.com/e/${id}" allow="fullscreen" allowfullscreen loading="lazy"></iframe>
-            `;
-            gallery.appendChild(item);
+        // Frontend Connection URL - IMPORTANT: Replace with your actual backend URL
+        const backendUrl = 'https://doodpl.onrender.com'; // Or 'http://localhost:3000' for local testing
+
+        const socket = io(backendUrl);
+
+        const messagesDiv = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const usernameInput = document.getElementById('usernameInput');
+        const sendButton = document.getElementById('sendButton');
+
+        let currentUser = '';
+
+        // Function to append messages to the chatbox
+        function appendMessage(msg) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            // Add a class based on whether it's your message or someone else's
+            if (msg.user === currentUser && currentUser !== '') {
+                messageElement.classList.add('self');
+            } else {
+                messageElement.classList.add('other');
+            }
+            messageElement.innerHTML = `<strong>${msg.user}</strong>: ${msg.text}`;
+            messagesDiv.appendChild(messageElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight; // Scroll to bottom
+        }
+
+        // --- Event Listeners ---
+
+        // Enable/disable input and button based on username
+        usernameInput.addEventListener('input', () => {
+            currentUser = usernameInput.value.trim();
+            if (currentUser) {
+                messageInput.disabled = false;
+                sendButton.disabled = false;
+                usernameInput.readOnly = true; // Prevent changing username after starting
+            } else {
+                messageInput.disabled = true;
+                sendButton.disabled = true;
+                usernameInput.readOnly = false;
+            }
         });
+
+        // Send message on button click
+        sendButton.addEventListener('click', () => {
+            const messageText = messageInput.value.trim();
+            if (messageText && currentUser) {
+                // Emit the 'chat message' event with the correct structure
+                socket.emit('chat message', { user: currentUser, text: messageText });
+                messageInput.value = ''; // Clear input
+            }
+        });
+
+        // Send message on Enter key press
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendButton.click();
+            }
+        });
+
+        // --- Socket.io Event Handling ---
+
+        // Listen for incoming 'chat message' events
+        socket.on('chat message', (msg) => {
+            appendMessage(msg);
+        });
+
+        // Handle connection events (for debugging)
+        socket.on('connect', () => {
+            console.log('Connected to Socket.io server!');
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from Socket.io server.');
+        });
+
+        socket.on('connect_error', (err) => {
+            console.error('Socket.io connection error:', err);
+        });
+
+        // --- Fetching Old Messages ---
+        async function fetchOldMessages() {
+            try {
+                // Replace with your actual backend API URL
+                const response = await fetch(`${backendUrl}/messages`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const messages = await response.json();
+                messages.forEach(msg => appendMessage(msg));
+            } catch (error) {
+                console.error('Error fetching old messages:', error);
+            }
+        }
+
+        // Fetch messages when the page loads
+        document.addEventListener('DOMContentLoaded', fetchOldMessages);
     </script>
-    <!-- Chat Room UI -->
-<div id="chatroom" style="margin-top:40px; max-width:600px; width:100%;">
-  <div id="messages" style="background:#fff; border:1px solid #eee; height:300px; overflow:auto; padding:10px; border-radius:8px;"></div>
-  <form id="chat-form" style="display:flex; margin-top:8px;">
-    <input id="m" autocomplete="off" placeholder="Type a message..." style="flex:1; padding:8px; border-radius:4px; border:1px solid #ccc;" />
-    <button style="padding:8px 12px; margin-left:8px;">Send</button>
-  </form>
-</div>
-<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-<script>
-  const socket = io('http://localhost:3000'); // change if server is remote
-  const messages = document.getElementById('messages');
-  const form = document.getElementById('chat-form');
-  const input = document.getElementById('m');
-
-  socket.on('messages', msgs => {
-    messages.innerHTML = '';
-    msgs.forEach(msg => {
-      const div = document.createElement('div');
-      div.textContent = msg.text;
-      messages.appendChild(div);
-    });
-    messages.scrollTop = messages.scrollHeight;
-  });
-
-  socket.on('chat message', msg => {
-    const div = document.createElement('div');
-    div.textContent = msg.text;
-    messages.appendChild(div);
-    messages.scrollTop = messages.scrollHeight;
-  });
-
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    if (input.value) {
-      socket.emit('chat message', input.value);
-      input.value = '';
-    }
-  });
-</script>
 </body>
 </html>
