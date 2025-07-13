@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Paste Preview</title>
+    <title>Doodstream</title>
     <style>
         body {
             font-family: sans-serif;
@@ -12,95 +12,31 @@
             align-items: center;
             padding: 20px;
         }
-        #pasteArea {
-            border: 2px dashed #ccc;
-            padding: 50px;
-            text-align: center;
-            cursor: text;
-            min-height: 100px;
-            width: 80%;
-            max-width: 600px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.2em;
-            color: #777;
-        }
-        #previewContainer {
+        #imageDisplayArea {
             margin-top: 20px;
-            max-width: 100%;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-        }
-        .previewImage {
-            max-width: 200px;
-            max-height: 200px;
             border: 1px solid #ddd;
-            padding: 5px;
-            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            padding: 10px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        #previewImage {
+            max-width: 100%; /* Ensures the image is responsive */
+            height: auto;   /* Maintains aspect ratio */
+            display: block; /* Removes extra space below image */
+            margin: 0 auto; /* Centers the image */
+        }
+        .image-caption {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #555;
         }
     </style>
 </head>
 <body>
-    <h1>Paste Image Here</h1>
-    <div id="pasteArea" contenteditable="true">
-        Paste an image (Ctrl+V or Cmd+V) here or type something...
+    <h1>Our Website's Featured Image</h1>
+    <div id="imageDisplayArea">
+        <img id="previewImage" src="https://i.postimg.cc/W32Ck5fg/Screenshot-20250713-110824-1.jpg" alt="Doodpl Logo Preview">
+        <p class="image-caption">This is a preview of our main website logo.</p>
     </div>
-    <div id="previewContainer">
-        </div>
-
-    <script>
-        const pasteArea = document.getElementById('pasteArea');
-        const previewContainer = document.getElementById('previewContainer');
-
-        pasteArea.addEventListener('paste', (event) => {
-            event.preventDefault(); // Prevent default paste behavior (e.g., pasting text)
-
-            const items = (event.clipboardData || event.originalEvent.clipboardData).items;
-
-            for (const item of items) {
-                if (item.type.startsWith('image/')) {
-                    const blob = item.getAsFile(); // Get the image as a Blob object
-
-                    if (blob) {
-                        const img = document.createElement('img');
-                        img.classList.add('previewImage');
-
-                        // Use URL.createObjectURL for efficient preview
-                        img.src = URL.createObjectURL(blob);
-
-                        img.onload = () => {
-                            // Revoke the object URL when the image is loaded to free up memory
-                            URL.revokeObjectURL(img.src);
-                        };
-
-                        previewContainer.appendChild(img);
-
-                        // Optionally, clear the placeholder text
-                        if (pasteArea.textContent === 'Paste an image (Ctrl+V or Cmd+V) here or type something...') {
-                            pasteArea.textContent = '';
-                        }
-                    }
-                }
-            }
-        });
-
-        // Optional: Clear the placeholder text when the user starts typing
-        pasteArea.addEventListener('focus', () => {
-            if (pasteArea.textContent === 'Paste an image (Ctrl+V or Cmd+V) here or type something...') {
-                pasteArea.textContent = '';
-            }
-        });
-
-        // Optional: Restore placeholder if pasteArea becomes empty
-        pasteArea.addEventListener('blur', () => {
-            if (pasteArea.textContent.trim() === '') {
-                pasteArea.textContent = 'Paste an image (Ctrl+V or Cmd+V) here or type something...';
-            }
-        });
-    </script>
 </body>
 </html>
