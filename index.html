@@ -3,40 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doodstream</title>
+    <title>Doodstream - Full HD Video</title>
+    <!-- Tailwind CSS CDN for easy styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Custom styles for the Inter font */
         body {
-            font-family: sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
-        #imageDisplayArea {
-            margin-top: 20px;
-            border: 1px solid #ddd;
-            padding: 10px;
-            box-shadow: 0 0 8px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        #previewImage {
-            max-width: 100%; /* Ensures the image is responsive */
-            height: auto;   /* Maintains aspect ratio */
-            display: block; /* Removes extra space below image */
-            margin: 0 auto; /* Centers the image */
-        }
-        .image-caption {
-            margin-top: 10px;
-            font-size: 0.9em;
-            color: #555;
+            font-family: "Inter", sans-serif;
         }
     </style>
 </head>
-<body>
-    <h1>Our Website's Featured Image</h1>
-    <div id="imageDisplayArea">
-        <img id="previewImage" src="https://i.postimg.cc/W32Ck5fg/Screenshot-20250713-110824-1.jpg" alt="Doodpl Logo Preview">
-        <p class="image-caption">This is a preview of our main website logo.</p>
-    </div>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+    <!-- Header Section -->
+    <header class="bg-white shadow-md py-4 px-6 flex justify-center items-center rounded-b-lg">
+        <div class="header-left">
+            <h1 class="logo">
+                <a href="index.html" id="logo-link" class="flex items-center space-x-2">
+                    <img src="https://i.postimg.cc/W32Ck5fg/Screenshot-20250713-110824-1.jpg" alt="doodpl Logo" class="h-10 w-auto rounded-md">
+                    <span class="text-2xl font-bold text-gray-800">Doodstream</span>
+                </a>
+            </h1>
+        </div>
+    </header>
+
+    <!-- Main Content Area - Image Preview -->
+    <main class="flex-grow flex flex-col items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-2xl w-full text-center">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Your Image Preview</h2>
+            <div class="border-2 border-dashed border-gray-300 p-4 rounded-md">
+                <img src="https://i.postimg.cc/W32Ck5fg/Screenshot-20250713-110824-1.jpg" alt="Preview of Doodpl Logo" class="max-w-full h-auto mx-auto rounded-md shadow-lg">
+            </div>
+            <p class="mt-4 text-gray-600">This is the image currently featured on your website.</p>
+        </div>
+    </main>
+
+    <!-- Optional: Footer Section -->
+    <footer class="bg-gray-800 text-white py-4 text-center rounded-t-lg mt-8">
+        <p>&copy; 2025 Doodstream. All rights reserved.</p>
+    </footer>
+
 </body>
 </html>
