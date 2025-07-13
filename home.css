@@ -1,0 +1,898 @@
+/* --- Global Variables --- */
+:root {
+    --primary-color: #141414; /* Dark background */
+    --secondary-color: #1f1f1f; /* Slightly lighter for sections/modals/footer */
+    --text-color: #ffffff; /* White text */
+    --highlight-color: #e50914; /* Netflix-like red for accents */
+    --dark-overlay: rgba(0, 0, 0, 0.8); /* Semi-transparent black for overlays */
+    --light-overlay: rgba(0, 0, 0, 0.5); /* Lighter semi-transparent black for overlays */
+    --border-color: #333; /* Subtle border color */
+    --gold-rating: #f5c518; /* Gold color for star ratings */
+    --spacing-xs: 0.5rem;
+    --spacing-s: 1rem;
+    --spacing-m: 1.5rem;
+    --spacing-l: 2rem;
+    --spacing-xl: 3rem;
+    --spacing-xxl: 5rem;
+}
+
+/* --- Base Body Styles --- */
+body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* Prevents horizontal scroll from overflowing content */
+}
+
+/* --- Header Styles --- */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0; /* REMOVE ALL PADDING FROM THE HEADER ITSELF */
+    background-color: var(--dark-overlay);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    box-sizing: border-box;
+    height: 80px; /* Fixed height for the header */
+    transition: background-color 0.3s ease;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    /* Add the desired left padding here for the content within header-left */
+    padding-left: var(--spacing-xl); /* This sets the main left margin for desktop */
+    gap: var(--spacing-l); /* Space BETWEEN the logo and navigation links */
+}
+
+.logo {
+    /* Target the h1 container of the logo image */
+    margin: 0; /* Remove all default margins from h1 */
+    padding: 0; /* Remove any default padding */
+    display: flex;
+    align-items: center; /* Vertically center the image inside */
+    justify-content: flex-start; /* Ensure logo image is at the start of its container */
+    height: 100%; /* Make sure the h1 takes up available height in header-left */
+    cursor: pointer;
+    text-decoration: none;
+    transition: filter 0.3s ease;
+}
+
+.logo:hover {
+    filter: brightness(1.2);
+}
+
+/* This rule was missing in your provided home.css and is crucial for image sizing */
+.header-logo {
+    max-height: 70px; /* Adjust this value for your desired logo size (e.g., 60px, 75px) */
+    width: auto;     /* Maintain aspect ratio */
+    display: block;  /* Essential: removes extra space below inline images */
+    vertical-align: middle; /* Helps with vertical alignment */
+}
+
+nav {
+    /* No specific style needed for nav itself here */
+}
+
+nav a {
+    color: var(--text-color);
+    text-decoration: none;
+    margin: 0 var(--spacing-s); /* Spacing between nav links */
+    font-size: 1rem;
+    padding: 0.25rem 0;
+    transition: color 0.3s ease, font-weight 0.3s ease;
+}
+
+nav a:hover {
+    color: #e0e0e0;
+}
+
+nav a.active-nav {
+    color: var(--highlight-color);
+    font-weight: bold;
+}
+
+.header-right {
+    /* Add the desired right padding here for the content within header-right */
+    padding-right: var(--spacing-xl); /* This sets the main right margin for desktop */
+}
+
+.search-box button {
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.search-box button:hover {
+    color: var(--highlight-color);
+}
+
+
+/* --- Responsive Design Adjustments --- */
+
+@media (max-width: 768px) {
+    header {
+        height: 60px; /* Adjust header height for smaller screens */
+    }
+
+    .header-left {
+        /* Set smaller padding for mobile, or 0 if you want it completely flush even with other content */
+        padding-left: var(--spacing-m); /* Smaller left margin for mobile */
+        gap: var(--spacing-s); /* Adjust gap between logo and nav for mobile */
+    }
+
+    .header-logo {
+        max-height: 45px; /* Adjust logo size for smaller screens */
+    }
+
+    nav a {
+        font-size: 0.9rem;
+    }
+
+    .header-right {
+        padding-right: var(--spacing-m); /* Smaller right margin for mobile */
+    }
+}
+
+@media (max-width: 480px) {
+    .header-left {
+        padding-left: var(--spacing-s); /* Even smaller left margin for very small screens */
+        gap: var(--spacing-xs); /* Even smaller gap */
+    }
+
+    .header-logo {
+        max-height: 40px; /* Adjust logo size for very small screens */
+    }
+
+    nav a {
+        font-size: 0.8rem;
+        margin: 0 var(--spacing-xs); /* Tighter spacing for nav links */
+    }
+
+    .header-right {
+        padding-right: var(--spacing-s); /* Even smaller right margin */
+    }
+}
+
+
+/* IMPORTANT: Re-adjust main content padding so it doesn't also hug the edges */
+#main-content {
+    /* Ensure main content starts below the fixed header */
+    padding-top: 100px; /* Adjust if 80px + some buffer is better, or use calc(80px + var(--spacing-s)) */
+    
+    /* Ensure main content has its own left and right padding */
+    padding-left: var(--spacing-xl); 
+    padding-right: var(--spacing-xl); 
+    padding-bottom: var(--spacing-xxl);
+    
+    position: relative;
+    z-index: 5;
+}
+
+/* For main content on smaller screens */
+@media (max-width: 768px) {
+    #main-content {
+        padding-top: 80px; /* Adjust for smaller header height */
+        padding-left: var(--spacing-m);
+        padding-right: var(--spacing-m);
+    }
+}
+
+@media (max-width: 480px) {
+    #main-content {
+        padding-top: 70px; /* Adjust for smallest header height */
+        padding-left: var(--spacing-s);
+        padding-right: var(--spacing-s);
+    }
+}
+
+/* --- Banner Styles (index.html) --- */
+#banner {
+    height: 100vh; /* Takes full viewport height */
+    width: 100%;
+    background-size: cover;
+    background-position: center center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 5%;
+    position: relative;
+    transition: background-image 0.5s ease-in-out; /* Smooth image transition */
+    box-sizing: border-box;
+    margin-top: 80px; /* Pushes banner down to account for fixed header */
+}
+
+#banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to top, var(--primary-color) 0%, rgba(0, 0, 0, 0.3) 50%, rgba(0, 0, 0, 0.8) 100%);
+    z-index: 1; /* Places the gradient above the background image */
+}
+
+.banner-content {
+    background: linear-gradient(to right, rgba(0,0,0,0.8), transparent); /* Gradient behind text for readability */
+    padding: var(--spacing-l);
+    border-radius: 8px;
+    max-width: 50%; /* Limits text width */
+    position: relative;
+    z-index: 2; /* Ensures banner content is above the gradient overlay */
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Subtle text shadow for better contrast */
+}
+
+#banner-title {
+    font-size: 3rem;
+    margin-bottom: var(--spacing-s);
+}
+
+.banner-buttons button {
+    background-color: var(--highlight-color);
+    color: var(--text-color);
+    border: none;
+    padding: var(--spacing-s) var(--spacing-l);
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin-right: var(--spacing-s);
+    border-radius: 4px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.banner-buttons button:hover {
+    background-color: #ff0000; /* Slightly darker red on hover */
+    transform: scale(1.05);
+}
+
+.banner-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: var(--light-overlay);
+    border: none;
+    color: var(--text-color);
+    font-size: 2rem;
+    padding: var(--spacing-s);
+    cursor: pointer;
+    z-index: 10;
+    border-radius: 50%; /* Circular arrows */
+    transition: background-color 0.3s ease;
+}
+
+.banner-arrow:hover {
+    background-color: var(--dark-overlay);
+}
+
+.banner-arrow.left { left: var(--spacing-s); }
+.banner-arrow.right { right: var(--spacing-s); }
+
+/* --- Main Content Sections (index.html) --- */
+#main-content {
+    /* Pushes main content down from the header AND provides space for the footer */
+    padding: 100px var(--spacing-xl) var(--spacing-xxl) var(--spacing-xl); /* TOP: 100px, SIDES: 3rem, BOTTOM: 5rem */
+    position: relative;
+    z-index: 5; /* Ensures main content is above banner gradient */
+}
+
+section {
+    margin-bottom: var(--spacing-xl); /* Space between content sections */
+}
+
+section h2 {
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-s);
+    color: var(--text-color);
+    border-left: 5px solid var(--highlight-color); /* Highlight border on headings */
+    padding-left: 10px;
+}
+
+.list-container {
+    display: flex;
+    overflow-x: auto; /* Enables horizontal scrolling for movie lists */
+    overflow-y: hidden;
+    padding-bottom: var(--spacing-s); /* Space for scrollbar */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    scrollbar-width: thin; /* Firefox scrollbar */
+    scrollbar-color: var(--highlight-color) var(--secondary-color); /* Firefox scrollbar color */
+}
+
+/* Custom scrollbar for WebKit browsers */
+.list-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.list-container::-webkit-scrollbar-track {
+    background: var(--secondary-color);
+    border-radius: 4px;
+}
+
+.list-container::-webkit-scrollbar-thumb {
+    background-color: var(--highlight-color);
+    border-radius: 4px;
+}
+
+.list-container::-webkit-scrollbar-thumb:hover {
+    background-color: #ff0000; /* Darker red on hover */
+}
+
+.list-container img {
+    width: 200px;
+    margin-right: var(--spacing-s);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth hover effects for posters */
+    flex-shrink: 0; /* Prevents images from shrinking */
+    aspect-ratio: 2/3; /* Standard movie poster aspect ratio */
+    object-fit: cover; /* Ensures images fill their space without distortion */
+}
+
+.list-container img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(229, 9, 20, 0.7); /* Red glow on hover */
+}
+
+/* --- Modals (General Styling for both movie and search) --- */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1001; /* High z-index to appear on top */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Enable scroll if content is too tall */
+    background-color: rgba(0, 0, 0, 0.8); /* Black w/ opacity */
+    justify-content: center; /* Center content horizontally */
+    align-items: center; /* Center content vertically */
+    padding: var(--spacing-s); /* Padding around modal content */
+    box-sizing: border-box; /* Include padding in dimensions */
+}
+
+/* --- Movie Details Modal Content (FULL SCREEN) --- */
+.modal-content {
+    background-color: var(--secondary-color);
+    padding: 20px; /* Adjusted padding for full screen */
+    border-radius: 0; /* No rounded corners for full screen */
+    box-shadow: none; /* No shadow for full screen */
+    width: 100%; /* Occupy full width */
+    height: 100%; /* Occupy full height */
+    max-width: none; /* Remove max-width constraint */
+    max-height: none; /* Remove max-height constraint */
+    box-sizing: border-box; /* Include padding in width/height */
+    overflow-y: auto; /* Allow scrolling for content that exceeds screen height */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Smooth theme transition */
+    display: flex; /* Re-added flex for internal layout */
+    flex-direction: column; /* Re-added flex for internal layout */
+    gap: var(--spacing-m); /* Space between sections in modal */
+    /* Removed animation properties as they might conflict with full screen */
+}
+
+.modal-content .video-container {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio (height / width * 100) */
+    background-color: black;
+    border-radius: 8px; /* Kept for video frame */
+    overflow: hidden; /* Ensure iframe corners are rounded */
+}
+
+.modal-content iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+#modal-title {
+    font-size: 2.5rem; /* Slightly larger title */
+    margin: 0;
+    color: var(--text-color);
+}
+
+.modal-rating {
+    font-size: 1.3rem; /* Slightly larger rating */
+    color: var(--gold-rating);
+}
+
+#modal-description {
+    font-size: 1.1rem; /* Slightly larger description text */
+    line-height: 1.6;
+    color: #ccc;
+}
+
+#modal-add-list-button {
+    background-color: var(--highlight-color);
+    color: var(--text-color);
+    border: none;
+    padding: var(--spacing-s) var(--spacing-l);
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+    align-self: flex-start; /* Align button to start within flex column */
+}
+
+#modal-add-list-button:hover {
+    background-color: #ff0000;
+}
+
+/* --- Search Modal Content (FULL SCREEN - consistent with movie modal) --- */
+.search-modal-content {
+    background-color: var(--secondary-color);
+    padding: 20px; /* Adjusted padding for full screen */
+    border-radius: 0; /* No rounded corners for full screen */
+    box-shadow: none; /* No shadow for full screen */
+    width: 100%; /* Occupy full width */
+    height: 100%; /* Occupy full height */
+    max-width: none; /* Remove max-width constraint */
+    max-height: none; /* Remove max-height constraint */
+    box-sizing: border-box; /* Include padding in width/height */
+    overflow-y: auto; /* Allow scrolling for content that exceeds screen height */
+    /* Removed animation properties as they might conflict with full screen */
+}
+
+
+/* --- Close Button (For both modals - repositioned for full screen) --- */
+.close-button {
+    color: #aaa;
+    position: fixed; /* Use fixed positioning for full screen modal */
+    top: 20px; /* Adjust as needed for header visibility */
+    right: 20px; /* Adjust as needed */
+    font-size: 2.8rem; /* Larger close button */
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1002; /* Higher than modal content to be clickable */
+    transition: color 0.3s ease;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    border-radius: 50%; /* Circle background */
+    width: 50px; /* Make it a circle */
+    height: 50px; /* Make it a circle */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: var(--highlight-color);
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* --- Search Input & Results --- */
+#search-modal-input {
+    width: 100%;
+    padding: var(--spacing-s);
+    font-size: 1.8rem;
+    background-color: transparent;
+    border: none;
+    border-bottom: 2px solid var(--border-color);
+    color: var(--text-color);
+    margin-bottom: var(--spacing-l);
+    box-sizing: border-box;
+    outline: none;
+}
+
+#search-modal-input::placeholder {
+    color: #888;
+}
+
+#search-results {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--spacing-s);
+    max-height: calc(100vh - 200px); /* Adjust height for full screen search */
+    overflow-y: auto;
+    padding-right: var(--spacing-xs);
+    scrollbar-width: thin;
+    scrollbar-color: var(--highlight-color) var(--secondary-color);
+}
+
+#search-results::-webkit-scrollbar {
+    height: 8px;
+}
+
+#search-results::-webkit-scrollbar-track {
+    background: var(--secondary-color);
+    border-radius: 4px;
+}
+
+#search-results::-webkit-scrollbar-thumb {
+    background-color: var(--highlight-color);
+    border-radius: 4px;
+}
+
+#search-results::-webkit-scrollbar-thumb:hover {
+    background-color: #ff0000;
+}
+
+#search-results img {
+    width: 100%;
+    height: auto;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+}
+
+#search-results img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
+}
+
+/* Added styles for the hidden contentFrame iframe */
+#contentFrame {
+    /* Make the iframe completely hidden and take no space */
+    width: 0px;
+    height: 0px;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    display: none; /* Ensure it's not rendered visually */
+}
+
+/* --- FOOTER STYLES --- */
+#footer {
+    background-color: var(--secondary-color);
+    color: #a0a0a0;
+    text-align: center;
+    padding: var(--spacing-xl) var(--spacing-l);
+    margin-top: var(--spacing-xxl); /* Generous space from main content */
+    border-top: 1px solid var(--border-color);
+    font-size: 0.9em;
+    line-height: 1.6;
+}
+
+#footer p {
+    margin: var(--spacing-xs) 0;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* --- Responsive Design (Adjusted for full-screen modal) --- */
+@media (max-width: 1024px) {
+    /* Modal content already full screen, no max-width needed here */
+    #modal-title {
+        font-size: 2.2rem;
+    }
+    .modal-rating {
+        font-size: 1.2rem;
+    }
+    #modal-description {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    header {
+        padding: var(--spacing-xs) var(--spacing-s);
+        height: 60px;
+    }
+
+    .logo {
+        font-size: 1.8rem;
+        margin-right: var(--spacing-s);
+    }
+
+    nav a {
+        margin: 0 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    .search-box button {
+        font-size: 1.1rem;
+    }
+
+    #banner {
+        height: 70vh;
+        padding: 0 3%;
+        margin-top: 60px;
+    }
+
+    .banner-content {
+        max-width: 80%;
+        padding: var(--spacing-m);
+    }
+
+    #banner-title {
+        font-size: 2.5rem;
+    }
+
+    .banner-buttons button {
+        padding: 0.8rem var(--spacing-m);
+        font-size: 1rem;
+    }
+
+    .banner-arrow {
+        font-size: 1.8rem;
+        padding: 0.8rem;
+    }
+
+    #main-content { /* index.html main */
+        padding: 80px var(--spacing-m) var(--spacing-xl) var(--spacing-m);
+    }
+
+    section {
+        margin-bottom: var(--spacing-l);
+    }
+
+    section h2 {
+        font-size: 1.3rem;
+    }
+
+    .list-container img {
+        width: 150px;
+        margin-right: 0.8rem;
+    }
+    
+    /* Modal content already full screen, no max-width needed here */
+    #modal-title {
+        font-size: 2rem; /* Adjusted for tablets */
+    }
+    .modal-rating {
+        font-size: 1.1rem;
+    }
+    #modal-description {
+        font-size: 0.95rem;
+    }
+    #modal-add-list-button {
+        font-size: 0.95rem;
+        padding: var(--spacing-s) var(--spacing-m);
+    }
+
+    .close-button { /* For both modals */
+        font-size: 2.2rem; /* Adjusted for tablets */
+        top: 10px;
+        right: 15px;
+        width: 45px;
+        height: 45px;
+    }
+
+    #search-modal-input {
+        font-size: 1.5rem;
+        padding: 0.8rem;
+    }
+
+    #search-results {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 0.8rem;
+    }
+
+    #footer {
+        padding: var(--spacing-l) var(--spacing-m);
+        margin-top: var(--spacing-xl);
+        font-size: 0.85em;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        padding: var(--spacing-xs) var(--spacing-s);
+    }
+
+    .logo {
+        font-size: 1.5rem;
+        margin-right: var(--spacing-xs);
+    }
+
+    nav a {
+        margin: 0 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .search-box button {
+        font-size: 1rem;
+    }
+
+    #banner {
+        height: 60vh;
+        padding: 0 2%;
+        margin-top: 60px;
+    }
+
+    .banner-content {
+        max-width: 100%;
+        padding: var(--spacing-s);
+    }
+
+    #banner-title {
+        font-size: 1.8rem; /* Smaller title for very small screens */
+    }
+
+    .banner-buttons button {
+        padding: 0.6rem var(--spacing-s);
+        font-size: 0.9rem;
+        margin-right: var(--spacing-xs);
+    }
+
+    .banner-arrow {
+        font-size: 1.5rem;
+        padding: 0.6rem;
+    }
+
+    #main-content { /* index.html main */
+        padding: 70px var(--spacing-s) var(--spacing-xl) var(--spacing-s);
+    }
+
+    section {
+        margin-bottom: var(--spacing-m);
+    }
+
+    section h2 {
+        font-size: 1.2rem;
+    }
+
+    .list-container img {
+        width: 120px;
+        margin-right: 0.6rem;
+    }
+
+    /* Modal content already full screen, no max-width needed here */
+    #modal-title {
+        font-size: 1.5rem; /* Smaller title for very small screens */
+    }
+    .modal-rating {
+        font-size: 1rem;
+    }
+    #modal-description {
+        font-size: 0.9rem;
+    }
+    #modal-add-list-button {
+        font-size: 0.9rem;
+        padding: var(--spacing-xs) var(--spacing-m);
+    }
+
+
+    .close-button { /* For both modals */
+        font-size: 1.8rem;
+        top: 5px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+    }
+
+    #search-modal-input {
+        font-size: 1.2rem;
+        padding: 0.6rem;
+    }
+
+    #search-results {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 0.6rem;
+    }
+
+    #footer {
+        padding: var(--spacing-m) var(--spacing-s);
+        margin-top: var(--spacing-l);
+        font-size: 0.8em;
+    }
+}
+
+/* Optional: Animation for modal entry */
+@keyframes fadeInSlideUp {
+    from {
+        transform: translateY(20px); /* This will be overridden by full screen properties if used directly on modal-content */
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Apply animation on modal open */
+/* Removed specific transform animations that might conflict with full screen */
+.modal.open .modal-content,
+.modal.open .search-modal-content {
+    /* Full-screen modals might not need or benefit from slide-up animation as much */
+    /* Consider if you want to apply a simple fade-in or no animation for full screen */
+    opacity: 1; /* Ensure it's visible if using JavaScript to add 'open' class */
+}
+/* Add this to your home.css file */
+
+/* Star Rating Container */
+.star-rating {
+    display: flex; /* Arrange stars horizontally */
+    flex-direction: row-reverse; /* Display stars from right to left (for easier CSS targeting) */
+    justify-content: flex-start; /* Align to the start after reversal */
+    font-size: 2rem; /* Size of the stars */
+    color: #ccc; /* Default color of unselected stars */
+    margin-bottom: var(--spacing-s); /* Space below the rating */
+}
+
+/* Hide the actual radio buttons */
+.star-rating input[type="radio"] {
+    display: none;
+}
+
+/* Style the labels (which will be our stars) */
+.star-rating label {
+    cursor: pointer;
+    padding: 0 var(--spacing-xs); /* Space between stars */
+    transition: color 0.2s ease; /* Smooth transition for hover/selection */
+}
+
+/* Change star color on hover */
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+    color: var(--gold-rating); /* Gold color on hover */
+}
+
+/* Change star color when a radio button is checked */
+.star-rating input[type="radio"]:checked ~ label {
+    color: var(--gold-rating); /* Gold color for selected stars and previous ones */
+}
+
+/* For better accessibility, visually hide "Select your rating" text if using labels */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Also ensure these user-review-input styles are present in home.css */
+.user-review-input {
+    max-width: 850px; /* Adjustable! Change this value as needed */
+    margin-left: auto; /* Center the block horizontally */
+    margin-right: auto; /* Center the block horizontally */
+    padding: var(--spacing-l); /* Example padding for the review box itself */
+    background-color: var(--secondary-color); /* Example background */
+    border-radius: 8px; /* Example border radius */
+    margin-top: var(--spacing-l); /* Space above the review box */
+}
+
+.user-review-input textarea {
+    width: 100%; /* Make textarea take full width of its parent (.user-review-input) */
+    height: 150px; /* Set a default height */
+    padding: var(--spacing-s);
+    margin-top: var(--spacing-s);
+    margin-bottom: var(--spacing-s);
+    background-color: var(--primary-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    border-radius: 4px;
+    box-sizing: border-box; /* Crucial for padding/border not to add to width */
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 1rem;
+    resize: vertical; /* Allow vertical resizing */
+}
+
+.user-review-input button {
+    background-color: var(--highlight-color);
+    color: var(--text-color);
+    border: none;
+    padding: var(--spacing-s) var(--spacing-l);
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.user-review-input button:hover {
+    background-color: #ff0000;
+}
+
+.user-review-input .feedback-message {
+    margin-top: var(--spacing-s);
+    color: #00ff00; /* Example success color */
+    font-weight: bold;
+    display: none; /* Hidden by default, show with JavaScript */
+}
